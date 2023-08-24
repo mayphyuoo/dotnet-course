@@ -64,6 +64,14 @@
             // Console.WriteLine(myStringWithSymbols);
  
             bool myBool = true;
+
+            string[] myArr = new string[2];
+
+            myArr[0] = "hello";
+
+            DateTime startTime = DateTime.Now;
+
+            Console.WriteLine((DateTime.Now - startTime).TotalSeconds);
         }
     }
 }
