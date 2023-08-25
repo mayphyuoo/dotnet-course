@@ -69,7 +69,7 @@ namespace Intermediate
                         options => options.MapFrom(source => source.price * .8m));
             }));
 
-            IEnumerable<ComputerSnake>? computersSystem = System.Text.Json.JsonSerializer.Deserialize<IEnumerable<ComputerSnake>>("ComputersSnake.json");
+            IEnumerable<ComputerSnake>? computersSystem = System.Text.Json.JsonSerializer.Deserialize<IEnumerable<ComputerSnake>>(computersJson);
 
             if(computersSystem != null)
             {
@@ -77,7 +77,7 @@ namespace Intermediate
 
                 foreach (Computer computer in res)
                 {
-                    Console.WriteLine(computer.Motherboard, ": ", computer.Price);
+                    Console.WriteLine(computer.Motherboard + ": " + computer.Price);
                 }
             }
 
