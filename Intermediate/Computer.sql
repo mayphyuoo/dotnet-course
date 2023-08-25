@@ -19,3 +19,12 @@ CREATE TABLE TutorialAppSchema.Computer(
 );
 
 SELECT * FROM TutorialAppSchema.Computer
+
+INSERT INTO TutorialAppSchema.Computer (
+                Motherboard,
+                HasWifi,
+                HasLTE,
+                ReleaseDate,
+                Price,
+                VideoCard
+            ) VALUES ('Z690','True','False','2023-08-25','943.87','RTX 2060')
