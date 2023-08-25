@@ -5,6 +5,9 @@ using Microsoft.Extensions.Configuration;
 
 using Intermediate.Models;
 using Intermediate.Data;
+using System.Text.Json;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Intermediate
 {
@@ -15,25 +18,8 @@ namespace Intermediate
             IConfiguration config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
                 .Build();
+
             DataContextDapper dapper = new DataContextDapper(config);
-            DataContextEF entityFramework = new DataContextEF(config);
-
-            DateTime rightNow = dapper.LoadDataSingle<DateTime>("SELECT GETDATE()");
-
-            // Console.WriteLine(rightNow.ToString());
-
-            Computer myComputer = new Computer()
-            {
-                Motherboard = "Z690",
-                HasWifi = true,
-                HasLTE = false,
-                ReleaseDate = DateTime.Now,
-                Price = 943.87m,
-                VideoCard = "RTX 2060"
-            };
-
-            // entityFramework.Add(myComputer);
-            // entityFramework.SaveChanges();
 
             // string sql = @"INSERT INTO TutorialAppSchema.Computer (
             //     Motherboard,
@@ -50,60 +36,71 @@ namespace Intermediate
             //         + "','" + myComputer.VideoCard
             // + "')";
 
-            // Console.WriteLine(sql);
+            // overwrites
+            // File .WriteAllText("log.txt", "\n" + sql + "\n");
 
-            // bool result = dapper.ExecuteSql(sql);
+            // using StreamWriter openFile = new("log.txt", append: true);
 
-            // Console.WriteLine(result);
+            // openFile.WriteLine("\n" + sql + "\n");
 
-            string sqlSelect = @"
-            SELECT 
-                Computer.ComputerId,
-                Computer.Motherboard,
-                Computer.HasWifi,
-                Computer.HasLTE,
-                Computer.ReleaseDate,
-                Computer.Price,
-                Computer.VideoCard
-            from TutorialAppSchema.Computer";
+            // openFile.Close();
 
-            IEnumerable<Computer> computers = dapper.LoadData<Computer>(sqlSelect);
+            string computersJSON = File.ReadAllText("Computers.json");
 
-            Console.WriteLine("'ComputerId','Motherboard','HasWifi','HasLTE','ReleaseDate','Price','VideoCard'");
+            // Console.WriteLine(computersJSON);
 
-            foreach(Computer comp in computers)
+            JsonSerializerOptions options = new JsonSerializerOptions()
             {
-                Console.WriteLine("'" + comp.ComputerId
-                    + "','" + comp.Motherboard
-                    + "','" + comp.HasWifi
-                    + "','" + comp.HasLTE
-                    + "','" + comp.ReleaseDate.ToString("yyyy-MM-dd")
-                    + "','" + comp.Price
-                    + "','" + comp.VideoCard
-                + "'");
-            }
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
 
-            IEnumerable<Computer>? computersEf = entityFramework.Computer?.ToList<Computer>();
+            IEnumerable<Computer>? computersNewtonSoft = JsonConvert.DeserializeObject<IEnumerable<Computer>>(computersJSON);
 
-            if(computersEf != null)
+            IEnumerable<Computer>? computersSystem = System.Text.Json.JsonSerializer.Deserialize<IEnumerable<Computer>>(computersJSON, options);
+
+
+            if (computersNewtonSoft != null)
             {
-                Console.WriteLine("'ComputerId','Motherboard','HasWifi','HasLTE','ReleaseDate','Price','VideoCard'");
-
-                foreach(Computer comp in computersEf)
+                foreach (Computer computer in computersNewtonSoft)
                 {
-                    Console.WriteLine("'" + comp.ComputerId
-                        + "','" + comp.Motherboard
-                        + "','" + comp.HasWifi
-                        + "','" + comp.HasLTE
-                        + "','" + comp.ReleaseDate.ToString("yyyy-MM-dd")
-                        + "','" + comp.Price
-                        + "','" + comp.VideoCard
-                    + "'");
+                    string sql = @"INSERT INTO TutorialAppSchema.Computer (
+                        Motherboard,
+                        HasWifi,
+                        HasLTE,
+                        ReleaseDate,
+                        Price,
+                        VideoCard
+                    ) VALUES ('" + EscapeSingleQuote(computer.Motherboard) 
+                            + "','" + computer.HasWifi
+                            + "','" + computer.HasLTE
+                            + "','" + computer.ReleaseDate?.ToString("yyyy-MM-dd")
+                            + "','" + computer.Price
+                            + "','" + EscapeSingleQuote(computer.VideoCard)
+                    + "')";
+
+                    dapper.ExecuteSql(sql);
                 }
             }
 
-            // Console.WriteLine(myComputer.Motherboard);
-            // Console.WriteLine(myComputer.ReleaseDate);
+            JsonSerializerSettings settings = new JsonSerializerSettings()
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
+
+            string computersCopy = JsonConvert.SerializeObject(computersNewtonSoft, settings);
+
+            File.WriteAllText("computersCopyNewtonsoft.txt", computersCopy);
+
+            string computersCopySys = System.Text.Json.JsonSerializer.Serialize(computersSystem, options);
+
+            File.WriteAllText("computersCopySys.txt", computersCopySys);
+        }
+
+        static string EscapeSingleQuote(string input)
+        {
+            string output = input.Replace("'", "''");
+
+            return output;
         }
     }
 }
