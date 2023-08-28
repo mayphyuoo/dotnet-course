@@ -47,35 +47,33 @@ namespace Intermediate
 
             // openFile.Close();
 
-            string computersJson = File.ReadAllText("ComputersSnake.json");
+            string computersJson = File.ReadAllText("./ComputersSnake.json");
 
-            Mapper mapper = new Mapper(new MapperConfiguration((cfg) => {
-                cfg.CreateMap<ComputerSnake, Computer>()
-                    .ForMember(dest => dest.ComputerId, 
-                        options => options.MapFrom(source => source.computer_id))
-                    .ForMember(dest => dest.Motherboard,
-                        options => options.MapFrom(source => source.motherboard))
-                    .ForMember(dest => dest.HasWifi,
-                        options => options.MapFrom(source => source.has_wifi))
-                    .ForMember(dest => dest.HasLTE,
-                        options => options.MapFrom(source => source.has_lte))
-                    .ForMember(dest => dest.ReleaseDate,
-                        options => options.MapFrom(source => source.release_date))
-                    .ForMember(dest => dest.VideoCard,
-                        options => options.MapFrom(source => source.video_card))
-                    .ForMember(dest => dest.CPUCores,
-                        options => options.MapFrom(source => source.cpu_cores))
-                    .ForMember(dest => dest.Price,
-                        options => options.MapFrom(source => source.price * .8m));
-            }));
+            // Mapper mapper = new Mapper(new MapperConfiguration((cfg) => {
+            //     cfg.CreateMap<ComputerSnake, Computer>()
+            //         .ForMember(dest => dest.ComputerId, 
+            //             options => options.MapFrom(source => source.computer_id))
+            //         .ForMember(dest => dest.Motherboard,
+            //             options => options.MapFrom(source => source.motherboard))
+            //         .ForMember(dest => dest.HasWifi,
+            //             options => options.MapFrom(source => source.has_wifi))
+            //         .ForMember(dest => dest.HasLTE,
+            //             options => options.MapFrom(source => source.has_lte))
+            //         .ForMember(dest => dest.ReleaseDate,
+            //             options => options.MapFrom(source => source.release_date))
+            //         .ForMember(dest => dest.VideoCard,
+            //             options => options.MapFrom(source => source.video_card))
+            //         .ForMember(dest => dest.CPUCores,
+            //             options => options.MapFrom(source => source.cpu_cores))
+            //         .ForMember(dest => dest.Price,
+            //             options => options.MapFrom(source => source.price * .8m));
+            // }));
 
-            IEnumerable<ComputerSnake>? computersSystem = System.Text.Json.JsonSerializer.Deserialize<IEnumerable<ComputerSnake>>(computersJson);
+            IEnumerable<Computer>? computersSystem = System.Text.Json.JsonSerializer.Deserialize<IEnumerable<Computer>>(computersJson);
 
             if(computersSystem != null)
             {
-                IEnumerable<Computer> res = mapper.Map<IEnumerable<Computer>> (computersSystem);
-
-                foreach (Computer computer in res)
+                foreach (Computer computer in computersSystem)
                 {
                     Console.WriteLine(computer.Motherboard + ": " + computer.Price);
                 }
