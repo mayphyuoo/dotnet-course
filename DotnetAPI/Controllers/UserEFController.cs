@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 using DotnetAPI.Data;
 using DotnetAPI.Models;
@@ -12,11 +11,11 @@ namespace DotnetAPI.Controllers;
 [Route("[controller]")]
 public class UserEFController : ControllerBase
 {
-    DataContextEF _entityFramework;
+    IUserRepository _userRepository;
     IMapper _mapper;
-    public UserEFController(IConfiguration config)
+    public UserEFController(IConfiguration config, IUserRepository userRepository)
     {
-        _entityFramework = new DataContextEF(config);
+        _userRepository = userRepository;
 
         _mapper = new Mapper(new MapperConfiguration(cfg =>
         {
@@ -24,35 +23,24 @@ public class UserEFController : ControllerBase
         }));
     }
 
-    [HttpGet("GetUsers")]
-    public IEnumerable<User> GetUsers()
+    [HttpGet("GetUsersEf")]
+    public IEnumerable<User> GetUsersEf()
     {
-        IEnumerable<User> users = _entityFramework.Users.ToList<User>();
+        IEnumerable<User> users = _userRepository.GetUsersEf();
 
         return users;
     }
 
-    [HttpGet("GetSingleUser/{userId}")]
-    public User GetSingleUser(int userId)
+    [HttpGet("GetSingleUserEf/{userId}")]
+    public User GetSingleUserEf(int userId)
     {
-        User? user = _entityFramework.Users
-             .Where(u => u.UserId == userId)
-             .FirstOrDefault<User>();
-
-        if(user != null)
-        {
-            return user;
-        }
-
-        throw new Exception("Failed to Get User");
+        return _userRepository.GetSingleUserEf(userId);
     }
 
-    [HttpPut("EditUser")]
-    public IActionResult EditUser(User _user)
+    [HttpPut("EditUserEf")]
+    public IActionResult EditUserEf(User _user)
     {
-        User? user = _entityFramework.Users
-             .Where(u => u.UserId == _user.UserId)
-             .FirstOrDefault<User>();
+        User? user = _userRepository.GetSingleUserEf(_user.UserId);
 
         if (user != null)
         {
@@ -61,7 +49,7 @@ public class UserEFController : ControllerBase
             user.Email = _user.Email;
             user.Gender = _user.Gender;
             user.Active = _user.Active;
-            if(_entityFramework.SaveChanges() > 0)
+            if(_userRepository.SaveChanges())
             {
                 return Ok();
             }
@@ -72,13 +60,13 @@ public class UserEFController : ControllerBase
         throw new Exception("Failed to Get User");
     }
 
-    [HttpPost("AddUser")]
-    public IActionResult AddUser(UserToAddDto _user)
+    [HttpPost("AddUserEf")]
+    public IActionResult AddUserEf(UserToAddDto _user)
     {
         User user = _mapper.Map<User>(_user);
 
-        _entityFramework.Add(user);
-        if (_entityFramework.SaveChanges() > 0)
+        _userRepository.AddEntity<User>(user);
+        if (_userRepository.SaveChanges())
         {
             return Ok();
         }
@@ -86,17 +74,15 @@ public class UserEFController : ControllerBase
         throw new Exception("Failed to Add user");
     }
 
-    [HttpDelete("DeleteUser/{userId}")]
-    public IActionResult DeleteUser(int userId)
+    [HttpDelete("DeleteUserEf/{userId}")]
+    public IActionResult DeleteUserEf(int userId)
     {
-        User? user = _entityFramework.Users
-             .Where(u => u.UserId == userId)
-             .FirstOrDefault<User>();
+        User? user = _userRepository.GetSingleUserEf(userId);
 
         if (user != null)
         {
-            _entityFramework.Users.Remove(user);
-            if (_entityFramework.SaveChanges() > 0)
+            _userRepository.RemoveEntity<User>(user);
+            if (_userRepository.SaveChanges())
             {
                 return Ok();
             }
