@@ -4,7 +4,6 @@
     {
         public string Email { get; set; }
         public string Password { get; set; }
-        public string PasswordConfirm { get; set; }
 
         public UserForLoginDto()
         {
@@ -15,10 +14,6 @@
             if (Password == null)
             {
                 Password = "";
-            }
-            if (PasswordConfirm == null)
-            {
-                PasswordConfirm = "";
             }
         }
     }
