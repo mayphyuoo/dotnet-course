@@ -54,7 +54,7 @@ namespace DotnetAPI.Controllers
         }
 
         [HttpPut("UpsertPost")]
-        public IActionResult UpsertPost(PostToAddDto postToAdd)
+        public IActionResult UpsertPost(Post postToAdd)
         {
             /*TutorialAppSchema.spPosts_Upsert
             @UserId INT,
