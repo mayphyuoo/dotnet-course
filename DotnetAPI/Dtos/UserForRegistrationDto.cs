@@ -10,24 +10,20 @@ namespace DotnetAPI.Dtos
         public string LastName { get; set; }
         public string Gender { get; set; }
 
+        public string JobTitle { get; set; }
+        public string Department { get; set; }
+        public decimal Salary { get; set; }
+
         public UserForRegistrationDto() 
         {
             FirstName ??= "";
             LastName ??= "";
             Email ??= "";
             Gender ??= "";
-            if (Email == null)
-            {
-                Email = "";
-            }
-            if (Password == null)
-            {
-                Password = "";
-            }
-            if (PasswordConfirm == null)
-            {
-                PasswordConfirm = "";
-            }
+            Password ??= "";
+            PasswordConfirm ??= "";
+            JobTitle ??= "";
+            Department ??= "";
         }
     }
 }
